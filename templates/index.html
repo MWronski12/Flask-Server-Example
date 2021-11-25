@@ -1,0 +1,86 @@
+<!-- chapter03/templates/inde.html -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Flask Restful API Example</title>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <script type="text/javascript">
+
+      // GET request to server to retrieve LED state.
+      function getState() {
+        $.get("/led", function (serverResponse, status) {
+          console.log(serverResponse);
+          updateControls(serverResponse);
+        });
+      }
+
+      // POST Request to server to set LED state.
+      function postUpdate(payload) {
+        $.post("/led", payload, function (serverResponse, status) {
+          console.log(serverResponse);
+          updateControls(serverResponse);
+        });
+      }
+
+      function updateControls(data) {
+        $("input[type=range].brightnessLevelRed").val(data.red);
+        $("#brightnessLevelRed").html(data.red);
+
+        $("input[type=range].brightnessLevelGreen").val(data.green);
+        $("#brightnessLevelGreen").html(data.green);
+
+        $("input[type=range].brightnessLevelBlue").val(data.blue);
+        $("#brightnessLevelBlue").html(data.blue);
+      }
+
+      $(document).ready(function () {
+        // Event listener for Slider value changes.
+        // .on('input', ...) will fire as the slider changes (= lots of network traffic). Change to
+        // .on('change', ...) to fire only after mouse button is released.
+        $("input[type=range].brightnessLevelRed").on("change", function () {
+          brightness_level = Number($(this).val());
+          payload = { red: brightness_level };
+          console.log(payload);
+          postUpdate(payload);
+        });
+
+        $("input[type=range].brightnessLevelGreen").on("change", function () {
+          brightness_level = $(this).val();
+          payload = { green: brightness_level };
+          postUpdate(payload);
+        });
+
+        $("input[type=range].brightnessLevelBlue").on("change", function () {
+          // (7)
+          brightness_level = $(this).val();
+          payload = { blue: brightness_level };
+          postUpdate(payload);
+        });
+
+        // Initialise slider value form state on server.
+        getState();
+      });
+
+    </script>
+  </head>
+  <body>
+    <h1>Flask RESTful API Example</h1>
+    <p>LED is connected to GPIO {{pin}}</p><br />
+    
+    Red led brightness: <span id="brightnessLevelRed"></span>%<br />
+    <input type="range" min="0" max="100" value="0" class="brightnessLevelRed" />
+    <br />
+
+    Green led brightness: <span id="brightnessLevelGreen"></span>%<br />
+    <input type="range" min="0" max="100" value="0" class="brightnessLevelGreen" />
+    <br />
+    
+    Blue led brightness: <span id="brightnessLevelBlue"></span>%<br />
+    <input type="range" min="0" max="100" value="0" class="brightnessLevelBlue" />
+    <br />
+  </body>
+</html>
